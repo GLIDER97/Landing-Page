@@ -22,12 +22,30 @@ export const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleTheme }) => {
     { id: 'contact', label: 'Contact' },
   ];
 
+  const handleMobileNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    setIsOpen(false);
+    
+    // Wait for the menu to close/state to update before scrolling
+    setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+            const nav = document.querySelector('nav');
+            const navHeight = nav ? nav.getBoundingClientRect().height : 80;
+            const yOffset = -navHeight - 20; // Extra padding
+            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+            window.scrollTo({top: y, behavior: 'smooth'});
+        }
+    }, 100);
+  };
+
   return (
     <motion.nav 
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 100 }}
-      className={`sticky top-4 z-50 rounded-xl border-2 ${darkMode ? 'border-white bg-dark-bg' : 'border-black bg-white'} p-4 mt-4 shadow-neo mx-auto max-w-7xl`}
+      className={`sticky top-4 z-50 rounded-xl border-2 ${darkMode ? 'border-white bg-dark-bg' : 'border-black bg-white'} p-4 mt-4 shadow-neo mx-auto max-w-7xl relative`}
     >
       <div className="flex justify-between items-center">
         <a 
@@ -77,26 +95,27 @@ export const Navbar: React.FC<NavbarProps> = ({ darkMode, toggleTheme }) => {
       <AnimatePresence>
         {isOpen && (
             <motion.div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden xl:hidden"
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className={`absolute left-0 right-0 top-[calc(100%+0.5rem)] rounded-xl border-2 ${darkMode ? 'border-white bg-dark-bg' : 'border-black bg-white'} shadow-neo xl:hidden overflow-hidden z-50`}
             >
-                <div className="pt-6 pb-2 flex flex-col gap-4 font-bold text-lg text-center border-t-2 border-dashed border-gray-300 mt-4">
+                <div className="flex flex-col p-6 gap-4 font-bold text-lg text-center">
                     {navLinks.map((link) => (
                       <a 
                         key={link.id}
                         href={`#${link.id}`}
-                        onClick={() => setIsOpen(false)} 
-                        className="hover:text-google-blue py-2"
+                        onClick={(e) => handleMobileNavClick(e, link.id)} 
+                        className="hover:text-google-blue py-2 border-b-2 border-transparent hover:border-dashed hover:border-gray-300 transition-all cursor-pointer select-none"
                       >
                         {link.label}
                       </a>
                     ))}
-                    <div className="sm:hidden pt-2 flex justify-center">
+                    <div className="sm:hidden pt-4 flex justify-center">
                         <a 
                           href="#pricing" 
-                          onClick={() => setIsOpen(false)}
+                          onClick={(e) => handleMobileNavClick(e, 'pricing')}
                         >
                             <NeoButton variant="primary" size="sm" darkMode={darkMode}>
                                 Book Call
